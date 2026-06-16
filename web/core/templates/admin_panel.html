@@ -80,7 +80,7 @@
 
 <div class="grid">
 
-  <!-- USUÁRIOS -->
+  
   <div class="secao">
     <h2>Usuários</h2>
     <table>
@@ -100,7 +100,7 @@
             {% endif %}
           </td>
           <td style="display:flex;gap:0.4rem;flex-wrap:wrap;">
-            <!-- Atribuir cargo -->
+            
             <form class="inline" method="post" action="/admin/usuarios/{{ u.id }}/cargo/">
               {% csrf_token %}
               <select name="cargo_id" style="padding:0.2rem 0.4rem;font-size:0.75rem;background:#0f1117;border:1px solid #2d3148;color:#e2e8f0;border-radius:5px;">
@@ -149,7 +149,7 @@
     </form>
   </div>
 
-  <!-- CARGOS -->
+ 
   <div class="secao">
     <h2>Cargos</h2>
     <table>

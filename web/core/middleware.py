@@ -16,7 +16,7 @@ class AuthMiddleware:
     def __call__(self, request):
         path = request.path
 
-        # Libera rotas públicas (login, logout, static)
+        
         publico = any(path.startswith(p) for p in settings.PUBLIC_PATHS)
         is_static = path.startswith("/static/")
 

@@ -1,4 +1,3 @@
-# web/projeto/urls.py
 
 from django.urls import path, include
 

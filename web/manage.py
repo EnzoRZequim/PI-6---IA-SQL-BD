@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+
 """web/manage.py — ponto de entrada Django."""
 
 import os

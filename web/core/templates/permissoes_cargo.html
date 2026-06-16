@@ -101,7 +101,6 @@ function toggleTodos(tabela, marcar) {
     .forEach(cb => cb.checked = marcar);
 }
 
-// Pré-marca checkboxes com base nas permissões atuais vindas do servidor
 const permsAtuais = {{ perms_json|safe }};
 permsAtuais.forEach(p => {
   const cb = document.getElementById(`chk-${p.tabela}-${p.coluna}`);

@@ -21,10 +21,10 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.middleware.common.CommonMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",  # ← habilita request.session
+    "django.contrib.sessions.middleware.SessionMiddleware",  
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "core.middleware.AuthMiddleware",  # deve vir DEPOIS do SessionMiddleware
+    "core.middleware.AuthMiddleware",  
 ]
 
 ROOT_URLCONF = "projeto.urls"
@@ -42,7 +42,7 @@ TEMPLATES = [
     },
 ]
 
-# Sessões em arquivo (não precisa de banco Django)
+
 SESSION_ENGINE = "django.contrib.sessions.backends.file"
 SESSION_FILE_PATH = BASE_DIR / ".sessions"
 SESSION_FILE_PATH.mkdir(exist_ok=True)
@@ -52,15 +52,13 @@ STATIC_URL = "/static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# -----------------------------------------------------------------------
-# Caminhos dos bancos SQLite do projeto
-# -----------------------------------------------------------------------
-PROJECT_ROOT = BASE_DIR.parent  # raiz do PI-6---IA-SQL-BD-main
+
+PROJECT_ROOT = BASE_DIR.parent  
 
 DB_PATHS = {
     "biblioteca": str(PROJECT_ROOT / "db" / "biblioteca.sqlite"),
     "empresa":    str(PROJECT_ROOT / "db" / "empresa.sqlite"),
 }
 
-# Rotas públicas que não exigem login
+
 PUBLIC_PATHS = ["/login/", "/logout/"]

@@ -13,15 +13,12 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.conf import settings
 
-# Adiciona a raiz do projeto ao path para importar auth e IA
+
 sys.path.insert(0, str(settings.PROJECT_ROOT))
 
 import auth.models as auth_db
 
 
-# ---------------------------------------------------------------------------
-# Helpers de sessão
-# ---------------------------------------------------------------------------
 
 def sessao_usuario(request) -> dict | None:
     uid = request.session.get("usuario_id")
@@ -54,9 +51,6 @@ def db_path_ativo(request) -> str | None:
     return None
 
 
-# ---------------------------------------------------------------------------
-# Login / Logout
-# ---------------------------------------------------------------------------
 
 def login_view(request):
     erro = None
@@ -94,10 +88,6 @@ def logout_view(request):
     return redirect("/login/")
 
 
-# ---------------------------------------------------------------------------
-# Seleção de banco
-# ---------------------------------------------------------------------------
-
 def selecionar_banco(request, nome=None):
     u = sessao_usuario(request)
     if not u:
@@ -114,9 +104,6 @@ def selecionar_banco(request, nome=None):
     })
 
 
-# ---------------------------------------------------------------------------
-# Chat / IA
-# ---------------------------------------------------------------------------
 
 def chat_view(request):
     u = sessao_usuario(request)
@@ -129,7 +116,7 @@ def chat_view(request):
 
     db_path = settings.DB_PATHS[banco]
 
-    # Descobre tabelas e colunas visíveis para o usuário
+    
     import sqlite3
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -186,13 +173,13 @@ def chat_query(request):
     if not pergunta:
         return JsonResponse({"erro": "Pergunta vazia."}, status=400)
 
-    # Permissões do usuário
+    
     if u["is_admin"]:
-        permissoes = None  # admin vê tudo
+        permissoes = None  
     else:
         permissoes = auth_db.obter_permissoes(db_path, u["cargo_id"]) if u["cargo_id"] else []
 
-    # Chama a lógica do IA.py via função importada
+    
     try:
         from ia_bridge import consultar_ia
         resultado = consultar_ia(db_path, banco, pergunta, permissoes)
@@ -200,10 +187,6 @@ def chat_query(request):
     except Exception as e:
         return JsonResponse({"erro": str(e)}, status=500)
 
-
-# ---------------------------------------------------------------------------
-# Painel Admin
-# ---------------------------------------------------------------------------
 
 @exige_admin
 def admin_panel(request):
@@ -280,7 +263,7 @@ def admin_permissoes_cargo(request, cid):
 
     import sqlite3
 
-    # Monta mapa completo de tabelas/colunas do banco ativo
+
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE 'auth_%';")
@@ -294,7 +277,7 @@ def admin_permissoes_cargo(request, cid):
     cargo_row = next((c for c in auth_db.listar_cargos(db_path) if c["id"] == cid), None)
     permissoes_atuais = auth_db.listar_permissoes_cargo(db_path, cid)
 
-    # Indexa permissões atuais para checagem no template
+
     perms_set = {(p["banco"], p["tabela"], p["coluna"]) for p in permissoes_atuais}
 
     if request.method == "POST":
