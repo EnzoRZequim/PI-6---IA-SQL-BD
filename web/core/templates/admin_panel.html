@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel Admin — IA SQL BD</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0f1117; color: #e2e8f0; padding: 2rem;
+  }
+  header {
+    display: flex; align-items: center; gap: 1rem;
+    margin-bottom: 2rem; flex-wrap: wrap;
+  }
+  header h1 { font-size: 1.3rem; color: #7c8cf8; flex: 1; }
+  header a  { color: #7c8cf8; text-decoration: none; font-size: 0.85rem; }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+  @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+
+  .secao {
+    background: #1a1d27; border: 1px solid #2d3148;
+    border-radius: 10px; padding: 1.5rem;
+  }
+  .secao h2 { font-size: 1rem; color: #94a3b8; margin-bottom: 1.2rem; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  th { color: #7c8cf8; text-align: left; padding: 0.4rem 0.6rem;
+       border-bottom: 1px solid #2d3148; }
+  td { padding: 0.4rem 0.6rem; border-bottom: 1px solid #1e2238; color: #cbd5e1; }
+  tr:hover td { background: #1e2238; }
+
+  .badge {
+    display: inline-block; padding: 0.15rem 0.5rem;
+    border-radius: 4px; font-size: 0.72rem; font-weight: 600;
+  }
+  .badge.admin  { background: #312e81; color: #a5b4fc; }
+  .badge.normal { background: #1e2238; color: #64748b; }
+  .badge.sem    { background: #1e1e1e; color: #475569; font-style: italic; }
+
+  form.inline { display: inline; }
+  .btn {
+    padding: 0.3rem 0.7rem; border-radius: 6px; border: none;
+    font-size: 0.78rem; cursor: pointer; font-weight: 600;
+  }
+  .btn-perigo  { background: #7f1d1d; color: #fca5a5; }
+  .btn-perigo:hover { background: #991b1b; }
+  .btn-acao    { background: #1e3a5f; color: #93c5fd; }
+  .btn-acao:hover { background: #1e40af; }
+  .btn-primario { background: #7c8cf8; color: #fff; }
+  .btn-primario:hover { background: #6470e8; }
+
+  .form-linha {
+    display: flex; gap: 0.6rem; flex-wrap: wrap;
+    margin-top: 1rem; align-items: flex-end;
+  }
+  .form-linha input, .form-linha select {
+    padding: 0.5rem 0.7rem;
+    background: #0f1117; border: 1px solid #2d3148;
+    border-radius: 6px; color: #e2e8f0; font-size: 0.85rem; outline: none;
+    flex: 1; min-width: 100px;
+  }
+  .form-linha input:focus, .form-linha select:focus { border-color: #7c8cf8; }
+
+  select option { background: #1a1d27; }
+
+  .sep { border-top: 1px solid #2d3148; margin: 1.2rem 0; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⚙ Painel Administrativo <span style="color:#64748b;font-size:0.8rem">— {{ banco }}</span></h1>
+  <a href="/chat/">← Voltar ao chat</a>
+  <a href="/">Trocar banco</a>
+  <a href="/logout/">Sair</a>
+</header>
+
+<div class="grid">
+
+  <!-- USUÁRIOS -->
+  <div class="secao">
+    <h2>Usuários</h2>
+    <table>
+      <thead>
+        <tr><th>Username</th><th>Cargo</th><th>Tipo</th><th>Ações</th></tr>
+      </thead>
+      <tbody>
+      {% for u in usuarios %}
+        <tr>
+          <td>{{ u.username }}</td>
+          <td>{{ u.cargo_nome|default:"—" }}</td>
+          <td>
+            {% if u.is_admin %}
+              <span class="badge admin">Admin</span>
+            {% else %}
+              <span class="badge normal">Usuário</span>
+            {% endif %}
+          </td>
+          <td style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+            <!-- Atribuir cargo -->
+            <form class="inline" method="post" action="/admin/usuarios/{{ u.id }}/cargo/">
+              {% csrf_token %}
+              <select name="cargo_id" style="padding:0.2rem 0.4rem;font-size:0.75rem;background:#0f1117;border:1px solid #2d3148;color:#e2e8f0;border-radius:5px;">
+                <option value="">— sem cargo —</option>
+                {% for c in cargos %}
+                  <option value="{{ c.id }}" {% if c.id == u.cargo_id %}selected{% endif %}>{{ c.nome }}</option>
+                {% endfor %}
+              </select>
+              <button class="btn btn-acao" type="submit">Salvar</button>
+            </form>
+            <!-- Deletar (não aparece pro próprio admin) -->
+            {% if not u.is_admin %}
+            <form class="inline" method="post" action="/admin/usuarios/{{ u.id }}/deletar/"
+                  onsubmit="return confirm('Deletar usuário {{ u.username }}?')">
+              {% csrf_token %}
+              <button class="btn btn-perigo" type="submit">✕</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="4" style="color:#64748b">Nenhum usuário.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="sep"></div>
+    <h2>Criar usuário</h2>
+    <form method="post" action="/admin/usuarios/criar/">
+      {% csrf_token %}
+      <div class="form-linha">
+        <input name="username" type="text" placeholder="Username" required>
+        <input name="senha"    type="password" placeholder="Senha" required>
+        <select name="cargo_id">
+          <option value="">— sem cargo —</option>
+          {% for c in cargos %}
+            <option value="{{ c.id }}">{{ c.nome }}</option>
+          {% endfor %}
+        </select>
+        <select name="is_admin">
+          <option value="0">Usuário</option>
+          <option value="1">Admin</option>
+        </select>
+        <button class="btn btn-primario" type="submit">Criar</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- CARGOS -->
+  <div class="secao">
+    <h2>Cargos</h2>
+    <table>
+      <thead>
+        <tr><th>Nome</th><th>Descrição</th><th>Ações</th></tr>
+      </thead>
+      <tbody>
+      {% for c in cargos %}
+        <tr>
+          <td>{{ c.nome }}</td>
+          <td style="color:#64748b">{{ c.descricao|default:"—" }}</td>
+          <td style="display:flex;gap:0.4rem;">
+            <a class="btn btn-acao" href="/admin/cargos/{{ c.id }}/permissoes/">Permissões</a>
+            <form class="inline" method="post" action="/admin/cargos/{{ c.id }}/deletar/"
+                  onsubmit="return confirm('Deletar cargo {{ c.nome }}? Usuários perderão o cargo.')">
+              {% csrf_token %}
+              <button class="btn btn-perigo" type="submit">✕</button>
+            </form>
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="3" style="color:#64748b">Nenhum cargo criado.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="sep"></div>
+    <h2>Criar cargo</h2>
+    <form method="post" action="/admin/cargos/criar/">
+      {% csrf_token %}
+      <div class="form-linha">
+        <input name="nome"      type="text" placeholder="Nome do cargo" required>
+        <input name="descricao" type="text" placeholder="Descrição (opcional)">
+        <button class="btn btn-primario" type="submit">Criar</button>
+      </div>
+    </form>
+  </div>
+
+</div>
+</body>
+</html>

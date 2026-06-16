@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Permissões — {{ cargo.nome }}</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0f1117; color: #e2e8f0; padding: 2rem;
+  }
+  header { display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; }
+  header h1 { font-size: 1.2rem; color: #7c8cf8; flex: 1; }
+  header a  { color: #7c8cf8; text-decoration: none; font-size: 0.85rem; }
+
+  .info {
+    background: #1a1d27; border: 1px solid #2d3148;
+    border-radius: 8px; padding: 0.8rem 1.2rem;
+    font-size: 0.85rem; color: #94a3b8; margin-bottom: 1.5rem;
+  }
+
+  .tabela-bloco {
+    background: #1a1d27; border: 1px solid #2d3148;
+    border-radius: 10px; padding: 1.2rem 1.5rem; margin-bottom: 1.2rem;
+  }
+  .tabela-header {
+    display: flex; align-items: center; gap: 0.8rem;
+    margin-bottom: 0.8rem; flex-wrap: wrap;
+  }
+  .tabela-header h3 { font-size: 0.95rem; color: #c4b5fd; }
+  .sel-todos {
+    font-size: 0.75rem; color: #7c8cf8; cursor: pointer;
+    text-decoration: underline; background: none; border: none; padding: 0;
+  }
+
+  .cols-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .col-check { display: flex; align-items: center; gap: 0.4rem; }
+  .col-check input[type=checkbox] { accent-color: #7c8cf8; width: 14px; height: 14px; }
+  .col-check label {
+    font-size: 0.8rem; color: #94a3b8; cursor: pointer;
+    background: #13151f; padding: 0.25rem 0.6rem;
+    border-radius: 4px; border: 1px solid #2d3148;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .col-check input:checked + label { border-color: #7c8cf8; color: #e2e8f0; }
+
+  .salvar-area { margin-top: 2rem; }
+  .btn-salvar {
+    padding: 0.75rem 2rem; background: #7c8cf8; color: #fff;
+    border: none; border-radius: 8px; font-size: 1rem;
+    font-weight: 600; cursor: pointer; transition: background 0.2s;
+  }
+  .btn-salvar:hover { background: #6470e8; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Permissões — <span style="color:#e2e8f0">{{ cargo.nome }}</span></h1>
+  <a href="/admin/">← Voltar ao painel</a>
+</header>
+
+<div class="info">
+  Banco ativo: <strong>{{ banco }}</strong> &nbsp;·&nbsp;
+  Marque as <strong>colunas</strong> que este cargo pode visualizar.
+</div>
+
+<form method="post">
+  {% csrf_token %}
+
+  {% for tabela, colunas in schema.items %}
+  <div class="tabela-bloco">
+    <div class="tabela-header">
+      <h3>{{ tabela }}</h3>
+      <button type="button" class="sel-todos" onclick="toggleTodos('{{ tabela }}', true)">marcar todas</button>
+      <button type="button" class="sel-todos" onclick="toggleTodos('{{ tabela }}', false)">desmarcar</button>
+    </div>
+    <div class="cols-grid" id="grid-{{ tabela }}">
+      {% for coluna in colunas %}
+      <div class="col-check">
+        <input type="checkbox"
+               id="chk-{{ tabela }}-{{ coluna }}"
+               name="{{ tabela }}_{{ coluna }}"
+               value="1">
+        <label for="chk-{{ tabela }}-{{ coluna }}">{{ coluna }}</label>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+
+  <div class="salvar-area">
+    <button class="btn-salvar" type="submit">💾 Salvar permissões</button>
+  </div>
+</form>
+
+<script>
+function toggleTodos(tabela, marcar) {
+  document.querySelectorAll(`#grid-${tabela} input[type=checkbox]`)
+    .forEach(cb => cb.checked = marcar);
+}
+
+// Pré-marca checkboxes com base nas permissões atuais vindas do servidor
+const permsAtuais = {{ perms_json|safe }};
+permsAtuais.forEach(p => {
+  const cb = document.getElementById(`chk-${p.tabela}-${p.coluna}`);
+  if (cb) cb.checked = true;
+});
+</script>
+</body>
+</html>

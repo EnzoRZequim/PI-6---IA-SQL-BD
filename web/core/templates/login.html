@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login — IA SQL BD</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0f1117;
+    color: #e2e8f0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .card {
+    background: #1a1d27;
+    border: 1px solid #2d3148;
+    border-radius: 12px;
+    padding: 2.5rem 2rem;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  .logo {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  .logo h1 { font-size: 1.5rem; font-weight: 700; color: #7c8cf8; }
+  .logo p  { font-size: 0.85rem; color: #64748b; margin-top: 0.3rem; }
+
+  label { display: block; font-size: 0.8rem; color: #94a3b8; margin-bottom: 0.4rem; }
+
+  input, select {
+    width: 100%;
+    padding: 0.65rem 0.9rem;
+    background: #0f1117;
+    border: 1px solid #2d3148;
+    border-radius: 8px;
+    color: #e2e8f0;
+    font-size: 0.95rem;
+    margin-bottom: 1.1rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input:focus, select:focus { border-color: #7c8cf8; }
+
+  select option { background: #1a1d27; }
+
+  button {
+    width: 100%;
+    padding: 0.75rem;
+    background: #7c8cf8;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  button:hover { background: #6470e8; }
+
+  .erro {
+    background: #3b1c1c;
+    border: 1px solid #7f2020;
+    color: #f87171;
+    padding: 0.7rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    margin-bottom: 1.2rem;
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <h1>IA SQL BD</h1>
+    <p>Sistema de consulta em linguagem natural</p>
+  </div>
+
+  {% if erro %}
+    <div class="erro">{{ erro }}</div>
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+
+    <label for="banco">Banco de dados</label>
+    <select id="banco" name="banco">
+      {% for b in bancos %}
+        <option value="{{ b }}">{{ b }}</option>
+      {% endfor %}
+    </select>
+
+    <label for="username">Usuário</label>
+    <input id="username" name="username" type="text" placeholder="admin" autocomplete="username">
+
+    <label for="senha">Senha</label>
+    <input id="senha" name="senha" type="password" placeholder="••••••••" autocomplete="current-password">
+
+    <button type="submit">Entrar</button>
+  </form>
+</div>
+</body>
+</html>
